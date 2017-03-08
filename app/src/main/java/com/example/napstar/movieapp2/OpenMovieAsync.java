@@ -50,7 +50,7 @@ public   class OpenMovieAsync extends AsyncTask {
         {
             //add post execute here
             Log.d(DEBUG_TAG,"Starting Post Excecute");
-            //MainActivity ma= new MainActivity();
+
             mainActivity.updateMainViewWithResults((ArrayList<MovieModel>) result,mainActivity);
         }catch(Exception e)
         {

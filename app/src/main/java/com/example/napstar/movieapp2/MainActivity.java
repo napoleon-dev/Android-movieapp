@@ -158,8 +158,7 @@ public class MainActivity extends AppCompatActivity {
                 MovieModel movie= getItem(position);
                 if(convertView==null)
                 {
-                    //((ViewGroup)convertView.getParent()).removeView(convertView);
-                   // LayoutInflater inflater = LayoutInflater.from(getContext());
+
                     LayoutInflater mInflater = (LayoutInflater) _mainActivity.getContext()
                                                                     .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
                     convertView = mInflater.inflate(R.layout.movie_row_item, parent, false);
@@ -172,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
                ImageView ivPosterImage = (ImageView) convertView.findViewById(R.id.imageView);
                 Log.d(DEBUG_TAG, movie.getImgURL());
                 String imgURL=movie.getImgURL();
-               //Picasso.with(getContext()).load(movie.getImgURL()).into(ivPosterImage);
+
 
                Picasso.with(getContext())
                         .load(movie.getImgURL())
