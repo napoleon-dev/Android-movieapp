@@ -4,10 +4,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,10 +17,10 @@ import java.util.ArrayList;
  * Created by Napstar on 3/7/2017.
  */
 
-public   class OpenMovieAsync extends AsyncTask {
+public   class OpenMovieModelAsync extends AsyncTask {
     private Context mContext;
     private MainActivity mainActivity;
-    public OpenMovieAsync(Context context,MainActivity ma)
+    public OpenMovieModelAsync(Context context, MainActivity ma)
     {
         mContext = context;
         mainActivity=ma;
@@ -66,6 +62,7 @@ public   class OpenMovieAsync extends AsyncTask {
     private ArrayList<MovieModel> getNowPlayingMovies() throws IOException {
         //get now playing movies from open movies DB
         try{
+            MovieModel movieModel= new MovieModel();
             StringBuilder stringBuilder = new StringBuilder();
 
             stringBuilder.append(strURL);
@@ -92,7 +89,7 @@ public   class OpenMovieAsync extends AsyncTask {
 
                 inputStream = conn.getInputStream();
 
-                return parseMovieResults(stringify(inputStream));
+                return movieModel.parseMovieModelResults(stringify(inputStream));
             }
             else
             {
@@ -112,36 +109,5 @@ public   class OpenMovieAsync extends AsyncTask {
         return bufferedRdr.readLine();
     }
 
-    private ArrayList<MovieModel> parseMovieResults(String result)
-    {
-        ArrayList<MovieModel> results = new ArrayList<MovieModel>();
-        String streamAsString = result;
-        try{
-            JSONObject jsonObject = new JSONObject(streamAsString);
-            JSONArray array = (JSONArray) jsonObject.get("results");
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject c = array.getJSONObject(i);
 
-                JSONObject jsonMovie = array.getJSONObject(i);
-                MovieModel movieModel= new MovieModel();
-                movieModel.setMovieTitle(jsonMovie.getString("title"));
-                movieModel.setMovieGenre("na");;
-                Log.d(DEBUG_TAG,Integer.toString(jsonMovie.length()));
-                String strImgURL="https://image.tmdb.org/t/p/w500"+jsonMovie.getString("poster_path");
-                movieModel.setImgURL(strImgURL);
-                movieModel.setMovieYear(jsonMovie.getString("release_date"));
-                movieModel.setMovieID(jsonMovie.getString("id"));
-
-
-                results.add((movieModel));
-            }
-        }
-        catch(JSONException j)
-        {
-            System.err.println(j);
-            Log.d(DEBUG_TAG, "Error parsing JSON. String was: " + j.toString());
-        }
-
-        return results;
-    }
 }
