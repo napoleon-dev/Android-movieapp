@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
-            new OpenMovieAsync().execute();
+            new OpenMovieAsync(context,this).execute();
         } else {
             Log.d(DEBUG_TAG,"No Network Connection");
 
@@ -99,7 +99,37 @@ public class MainActivity extends AppCompatActivity {
         client.connect();
         AppIndex.AppIndexApi.start(client, getIndexApiAction());
     }
+    private Context getContext()
+    {
+        return getApplicationContext();
+    }
+    public  void updateMainViewWithResults(ArrayList<MovieModel> result,MainActivity mainActivity) {
+        try
+        {
+            //update  main activity here
+          //  ListView listView = (ListView)findViewById(R.id.movies_list);
+            //TextView textView = (TextView) ((Activity) context).findViewById(R.id.textView1);
 
+            ListView listView = (ListView)  mainActivity.findViewById(R.id.movies_list);
+            Log.d("upd8MainViewWithResults", result.toString());
+            // Add results to listView.
+            Context ctx=mainActivity.getContext();
+            MoviesArrayAdapter adapter =
+                    new MoviesArrayAdapter (mainActivity.getContext(), result,mainActivity);
+            listView.setAdapter(adapter);
+            if(listView.getParent()!=null)
+            {
+                ((ViewGroup)listView.getParent()).removeView(listView);
+            }
+            // Update Activity to show listView
+            mainActivity.setContentView(listView);
+        }
+        catch (Exception ex)
+        {
+            Log.d(DEBUG_TAG,ex.getMessage());
+        }
+
+    }
     @Override
     public void onStop() {
         super.onStop();
@@ -110,147 +140,13 @@ public class MainActivity extends AppCompatActivity {
         client.disconnect();
     }
 //inner class
-    private class OpenMovieAsync extends AsyncTask {
 
-
-            protected ArrayList<MovieModel> doInBackground(Object...params)
-            {
-                try {
-                    return getNowPlayingMovies();
-                }catch(IOException e) {
-                    Log.d(DEBUG_TAG,e.getMessage());
-                    return null;
-                }
-            }
-
-
-            @Override
-            protected void onPostExecute(Object result) {
-
-                try
-                {
-                    //add post execute here
-                    Log.d(DEBUG_TAG,"Starting Post Excecute");
-                    updateMainViewWithResults((ArrayList<MovieModel>) result);
-                }catch(Exception e)
-                {
-                    Log.d(DEBUG_TAG,e.getMessage());
-                }
-
-            }
-
-            private void updateMainViewWithResults(ArrayList<MovieModel> result) {
-                try
-                {
-                    //update  main activity here
-                    ListView listView = (ListView)findViewById(R.id.movies_list);
-                    Log.d("upd8MainViewWithResults", result.toString());
-                    // Add results to listView.
-                    MoviesArrayAdapter adapter =
-                            new MoviesArrayAdapter (context, result);
-                    listView.setAdapter(adapter);
-                    if(listView.getParent()!=null)
-                    {
-                        ((ViewGroup)listView.getParent()).removeView(listView);
-                    }
-                    // Update Activity to show listView
-                    setContentView(listView);
-                }
-                catch (Exception ex)
-                {
-                    Log.d(DEBUG_TAG,ex.getMessage());
-                }
-
-            }
-
-
-
-            private ArrayList<MovieModel> getNowPlayingMovies() throws IOException {
-               //get now playing movies from open movies DB
-                try{
-                    StringBuilder stringBuilder = new StringBuilder();
-
-                    stringBuilder.append(strURL);
-                    stringBuilder.append("?api_key=" + API_KEY);
-                    stringBuilder.append("&query=" + "language=en-US&page=1");
-                    URL url = new URL(stringBuilder.toString());
-                    InputStream inputStream = null;
-
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-                    conn.setReadTimeout(10000);
-                    conn.setConnectTimeout(15000);
-                    conn.setRequestMethod("GET");
-                    conn.addRequestProperty("Accept", "application/json");
-                    conn.setDoInput(true);
-
-                    // Establish a connection
-                    conn.connect();
-
-                    int response = conn.getResponseCode();
-                    if(response==200)
-                    {
-                        Log.d(DEBUG_TAG, "The response code is: " + response + " " + conn.getResponseMessage());
-
-                        inputStream = conn.getInputStream();
-
-                        return parseMovieResults(stringify(inputStream));
-                    }
-                    else
-                    {
-                        throw new IOException("Error:Server  Returned "+Integer.toString(response));
-                    }
-
-                }
-                finally {
-
-                }
-            }
-
-    private String stringify(InputStream  stream)throws IOException {
-        Reader rdr = null;
-        rdr = new InputStreamReader(stream, "UTF-8");
-        BufferedReader bufferedRdr = new BufferedReader(rdr);
-        return bufferedRdr.readLine();
-    }
-
-    private ArrayList<MovieModel> parseMovieResults(String result)
-            {
-                ArrayList<MovieModel> results = new ArrayList<MovieModel>();
-                String streamAsString = result;
-                try{
-                    JSONObject jsonObject = new JSONObject(streamAsString);
-                    JSONArray array = (JSONArray) jsonObject.get("results");
-                    for (int i = 0; i < array.length(); i++) {
-                        JSONObject c = array.getJSONObject(i);
-
-                        JSONObject jsonMovie = array.getJSONObject(i);
-                        MovieModel movieModel= new MovieModel();
-                        movieModel.setMovieTitle(jsonMovie.getString("title"));
-                        movieModel.setMovieGenre("na");;
-                        Log.d(DEBUG_TAG,Integer.toString(jsonMovie.length()));
-                        String strImgURL="https://image.tmdb.org/t/p/w500"+jsonMovie.getString("poster_path");
-                        movieModel.setImgURL(strImgURL);
-                        movieModel.setMovieYear(jsonMovie.getString("release_date"));
-                        movieModel.setMovieID(jsonMovie.getString("id"));
-
-
-                        results.add((movieModel));
-                    }
-                }
-                catch(JSONException j)
-                {
-                    System.err.println(j);
-                    Log.d(DEBUG_TAG, "Error parsing JSON. String was: " + j.toString());
-                }
-
-                return results;
-            }
-        }
 
     private class MoviesArrayAdapter extends ArrayAdapter<MovieModel>{
-        public MoviesArrayAdapter(Context context, ArrayList<MovieModel> moviesList) {
+        MainActivity _mainActivity;
+        public MoviesArrayAdapter(Context context, ArrayList<MovieModel> moviesList,MainActivity mainActivity) {
             super(context,0 , moviesList);
+            _mainActivity=mainActivity;
         }
 
         @Override
@@ -264,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 {
                     //((ViewGroup)convertView.getParent()).removeView(convertView);
                    // LayoutInflater inflater = LayoutInflater.from(getContext());
-                    LayoutInflater mInflater = (LayoutInflater) getApplicationContext()
+                    LayoutInflater mInflater = (LayoutInflater) _mainActivity.getContext()
                                                                     .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
                     convertView = mInflater.inflate(R.layout.movie_row_item, parent, false);
                 }
