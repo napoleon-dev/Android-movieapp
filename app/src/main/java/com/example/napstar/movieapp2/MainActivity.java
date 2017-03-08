@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                 tvTitle.setText(movie.getMovieTitle());
                 //tvGenre.setText(movie.getMovieGenre());
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY");
-                Date date1=new SimpleDateFormat("YYYY").parse(movie.getMovieYear());
+                Date date1=simpleDateFormat.parse(movie.getMovieYear());
 
                 simpleDateFormat = new SimpleDateFormat("YYYY");
                 simpleDateFormat.format(date1).toUpperCase();
