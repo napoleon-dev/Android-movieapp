@@ -1,5 +1,6 @@
 package com.example.napstar.movieapp2;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -20,18 +21,29 @@ import java.util.ArrayList;
 public   class OpenMovieModelAsync extends AsyncTask {
     private Context mContext;
     private MainActivity mainActivity;
+    private MovieModel movieModel;
+    private static final String DEBUG_TAG = "OpenMovieModelAsync";
+
     public OpenMovieModelAsync(Context context, MainActivity ma)
     {
         mContext = context;
         mainActivity=ma;
+        movieModel= new MovieModel();
+
+        // final ProgressDialog loading= ProgressDialog.show(mainActivity,"Fetching Data","Please wait.....",false,false);
     }
-    private final String API_KEY = "a347ef1926ae724eb261182a8de57b59";
-    private static final String DEBUG_TAG = "MovieApp2";
-    private static final String strURL="https://api.themoviedb.org/3/movie/now_playing";
+
+
+    protected  void onPreExecute(){
+       /* loading.setCancelable(false);
+        loading.setMessage("Fetching Data ..Please Wait");
+        loading.show();*/
+    }
+
     protected ArrayList<MovieModel> doInBackground(Object...params)
     {
         try {
-            return getNowPlayingMovies();
+            return movieModel.getNowPlayingMovies();
         }catch(IOException e) {
             Log.d(DEBUG_TAG,e.getMessage());
             return null;
@@ -48,6 +60,7 @@ public   class OpenMovieModelAsync extends AsyncTask {
             Log.d(DEBUG_TAG,"Starting Post Excecute");
 
             mainActivity.updateMainViewWithResults((ArrayList<MovieModel>) result,mainActivity);
+            //loading.dismiss();
         }catch(Exception e)
         {
             Log.d(DEBUG_TAG,e.getMessage());
@@ -59,55 +72,9 @@ public   class OpenMovieModelAsync extends AsyncTask {
 
 
 
-    private ArrayList<MovieModel> getNowPlayingMovies() throws IOException {
-        //get now playing movies from open movies DB
-        try{
-            MovieModel movieModel= new MovieModel();
-            StringBuilder stringBuilder = new StringBuilder();
 
-            stringBuilder.append(strURL);
-            stringBuilder.append("?api_key=" + API_KEY);
-            stringBuilder.append("&query=" + "language=en-US&page=1");
-            URL url = new URL(stringBuilder.toString());
-            InputStream inputStream = null;
 
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-            conn.setReadTimeout(10000);
-            conn.setConnectTimeout(15000);
-            conn.setRequestMethod("GET");
-            conn.addRequestProperty("Accept", "application/json");
-            conn.setDoInput(true);
-
-            // Establish a connection
-            conn.connect();
-
-            int response = conn.getResponseCode();
-            if(response==200)
-            {
-                Log.d(DEBUG_TAG, "The response code is: " + response + " " + conn.getResponseMessage());
-
-                inputStream = conn.getInputStream();
-
-                return movieModel.parseMovieModelResults(stringify(inputStream));
-            }
-            else
-            {
-                throw new IOException("Error:Server  Returned "+Integer.toString(response));
-            }
-
-        }
-        finally {
-
-        }
-    }
-
-    private String stringify(InputStream  stream)throws IOException {
-        Reader rdr = null;
-        rdr = new InputStreamReader(stream, "UTF-8");
-        BufferedReader bufferedRdr = new BufferedReader(rdr);
-        return bufferedRdr.readLine();
-    }
 
 
 }

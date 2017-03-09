@@ -1,6 +1,7 @@
 package com.example.napstar.movieapp2;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -36,9 +37,10 @@ public class MainActivity extends AppCompatActivity {
     private GoogleApiClient client;
     ArrayList<MovieModel> moviesList;
     Context context;
-    private final String API_KEY = "a347ef1926ae724eb261182a8de57b59";
+ //   private final String API_KEY = "a347ef1926ae724eb261182a8de57b59";
     private static final String DEBUG_TAG = "MovieApp2";
     private static final String strURL="https://api.themoviedb.org/3/movie/now_playing";
+   ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +48,11 @@ public class MainActivity extends AppCompatActivity {
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-        //movielis
+        //init Progress
+         ProgressDialog loading= new ProgressDialog(this);
+        loading.setCancelable(false);
+        loading.setMessage("Fetching Data ..Please Wait");
+        loading.show();
         moviesList= new ArrayList<MovieModel>();
         context=getApplicationContext();
         // Check if the NetworkConnection is active and connected.
@@ -54,7 +60,10 @@ public class MainActivity extends AppCompatActivity {
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
+
             new OpenMovieModelAsync(context,this).execute();
+            loading.dismiss();
+
         } else {
             Log.d(DEBUG_TAG,"No Network Connection");
 
@@ -110,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
             }
             // Update Activity to show listView
             mainActivity.setContentView(listView);
+
         }
         catch (Exception ex)
         {
@@ -128,8 +138,7 @@ public class MainActivity extends AppCompatActivity {
     }
 //inner class
 
-
-    private class MoviesArrayAdapter extends ArrayAdapter<MovieModel>{
+ private class MoviesArrayAdapter extends ArrayAdapter<MovieModel>{
         MainActivity _mainActivity;
         public MoviesArrayAdapter(Context context, ArrayList<MovieModel> moviesList,MainActivity mainActivity) {
             super(context,0 , moviesList);
@@ -152,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 //set title
                 TextView tvTitle=(TextView)convertView.findViewById(R.id.movie_title);
-               // TextView tvGenre=(TextView)convertView.findViewById(R.id.movie_genre);
+                 TextView tvGenre=(TextView)convertView.findViewById(R.id.movie_genre);
                 TextView tvYear=(TextView)convertView.findViewById(R.id.movie_year);
 
                ImageView ivPosterImage = (ImageView) convertView.findViewById(R.id.imageView);
@@ -165,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
                          .into(ivPosterImage);
 
                 tvTitle.setText(movie.getMovieTitle());
-                //tvGenre.setText(movie.getMovieGenre());
+                 tvGenre.setText(movie.getMovieGenre());
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY");
                 Date date1=simpleDateFormat.parse(movie.getMovieYear());
 
@@ -181,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
             return convertView;
         }
     }
+
 
 
 }
