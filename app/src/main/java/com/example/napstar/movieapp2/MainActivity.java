@@ -3,6 +3,7 @@ package com.example.napstar.movieapp2;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private GoogleApiClient client;
     ArrayList<MovieModel> moviesList;
     Context context;
+    private Typeface tfMedium,tfLight;
  //   private final String API_KEY = "a347ef1926ae724eb261182a8de57b59";
     private static final String DEBUG_TAG = "MovieApp2";
     private static final String strURL="https://api.themoviedb.org/3/movie/now_playing";
@@ -143,6 +145,8 @@ public class MainActivity extends AppCompatActivity {
         public MoviesArrayAdapter(Context context, ArrayList<MovieModel> moviesList,MainActivity mainActivity) {
             super(context,0 , moviesList);
             _mainActivity=mainActivity;
+            tfMedium =Typeface.createFromAsset(_mainActivity.getAssets(),"fonts/Raleway-Medium.ttf");
+            tfLight =Typeface.createFromAsset(_mainActivity.getAssets(),"fonts/Raleway-Light.ttf");
         }
 
         @Override
@@ -161,13 +165,19 @@ public class MainActivity extends AppCompatActivity {
                 }
                 //set title
                 TextView tvTitle=(TextView)convertView.findViewById(R.id.movie_title);
+                tvTitle.setTypeface(tfMedium);
+
                  TextView tvGenre=(TextView)convertView.findViewById(R.id.movie_genre);
+                tvGenre.setTypeface(tfLight);
+
                 TextView tvYear=(TextView)convertView.findViewById(R.id.movie_year);
 
+                tvYear.setTypeface(tfLight);
                ImageView ivPosterImage = (ImageView) convertView.findViewById(R.id.imageView);
                 Log.d(DEBUG_TAG, movie.getImgURL());
                 String imgURL=movie.getImgURL();
 
+                TextView tvID=(TextView)convertView.findViewById(R.id.movie_ID);
 
                Picasso.with(getContext())
                         .load(movie.getImgURL())
@@ -175,12 +185,14 @@ public class MainActivity extends AppCompatActivity {
 
                 tvTitle.setText(movie.getMovieTitle());
                  tvGenre.setText(movie.getMovieGenre());
+                tvID.setText(movie.getMovieID());
+
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY");
-                Date date1=simpleDateFormat.parse(movie.getMovieYear());
+                Date releaseDate=simpleDateFormat.parse(movie.getMovieYear());
 
                 simpleDateFormat = new SimpleDateFormat("YYYY");
-                simpleDateFormat.format(date1).toUpperCase();
-                tvYear.setText( simpleDateFormat.format(date1).toUpperCase());
+                simpleDateFormat.format(releaseDate).toUpperCase();
+                tvYear.setText( simpleDateFormat.format(releaseDate).toUpperCase());
             }
             catch(Exception ex)
             {

@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+
     >
 
 
@@ -55,4 +56,13 @@
         android:layout_below="@+id/movie_title"
         android:layout_alignStart="@+id/movie_title"
         android:layout_marginTop="11dp" />
+
+    <TextView
+        android:id="@+id/movie_ID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/imageView"
+        android:layout_alignStart="@+id/movie_genre"
+        android:text="TextView"
+        android:visibility="invisible" />
 </RelativeLayout>
