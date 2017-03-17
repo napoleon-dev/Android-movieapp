@@ -1,7 +1,6 @@
 package com.example.napstar.movieapp2;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -88,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                 // selected item
                 TextView tvID=(TextView) view.findViewById(R.id.movie_ID);
                 String selectedMovieID = (tvID).getText().toString();
-                Intent intent = new Intent(context, MovieDetails_2.class);
+                Intent intent = new Intent(context, MovieDetailsActivity.class);
 
                 intent.putExtra("movieID", selectedMovieID);
                 startActivity(intent);

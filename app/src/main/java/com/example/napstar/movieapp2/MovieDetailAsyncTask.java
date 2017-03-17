@@ -6,7 +6,7 @@ import android.os.AsyncTask;
  * Created by Napstar on 3/17/2017.
  */
 
-public class MovieDetail_2_AsyncTask extends AsyncTask  <Integer,Void,MovieDetails> {
+public class MovieDetailAsyncTask extends AsyncTask  <Integer,Void,MovieDetails> {
 
     @Override
     protected MovieDetails doInBackground(Integer... params) {

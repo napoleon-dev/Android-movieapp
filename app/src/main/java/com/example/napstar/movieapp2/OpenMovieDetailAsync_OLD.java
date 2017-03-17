@@ -10,16 +10,16 @@ import java.util.ArrayList;
  * Created by Napstar on 3/10/2017.
  */
 
-public class OpenMovieDetailAsync extends AsyncTask  <Integer,Void,ArrayList<MovieDetails>>{
+public class OpenMovieDetailAsync_OLD extends AsyncTask  <Integer,Void,ArrayList<MovieDetails>>{
     private Context mContext;
-    private MovieDetailsActivity movieDetailsActivity;
-    private MovieDetails_2 movieDetails_2;
+    private MovieDetailsActivity_OLD movieDetailsActivity;
+    private MovieDetailsActivity movieDetails_Activity;
     private MovieDetails movieDetailsModel;
-    private static final String DEBUG_TAG = "OpenMovieDetailAsync";
+    private static final String DEBUG_TAG = "OpenMovieDetailAsync_OLD";
 
 
 
-    public OpenMovieDetailAsync(Context context, MovieDetailsActivity ma)
+    public OpenMovieDetailAsync_OLD(Context context, MovieDetailsActivity_OLD ma)
     {
         mContext = context;
         movieDetailsActivity=ma;
@@ -27,10 +27,10 @@ public class OpenMovieDetailAsync extends AsyncTask  <Integer,Void,ArrayList<Mov
 
         // final ProgressDialog loading= ProgressDialog.show(mainActivity,"Fetching Data","Please wait.....",false,false);
     }
-    public OpenMovieDetailAsync(Context context, MovieDetails_2 ma)
+    public OpenMovieDetailAsync_OLD(Context context, MovieDetailsActivity ma)
     {
         mContext = context;
-        movieDetails_2=ma;
+        movieDetails_Activity =ma;
         movieDetailsModel= new MovieDetails();
 
         // final ProgressDialog loading= ProgressDialog.show(mainActivity,"Fetching Data","Please wait.....",false,false);
@@ -48,7 +48,7 @@ public class OpenMovieDetailAsync extends AsyncTask  <Integer,Void,ArrayList<Mov
             //add post execute here
             Log.d(DEBUG_TAG,"Starting Post Excecute");
             //update moviedetails activity here
-            movieDetails_2.updateMainViewWithResults( result,movieDetails_2);
+            movieDetails_Activity.updateMainViewWithResults( result, movieDetails_Activity);
 
         }catch(Exception e)
         {

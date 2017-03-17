@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,23 +20,19 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
-import org.w3c.dom.Text;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class MovieDetailsActivity extends AppCompatActivity {
-    private static final String DEBUG_TAG = "MovieDetials";
+    private static final String DEBUG_TAG = "MovieDetials_2";
     Context context;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
+
         //get the movie id from intent
         try
         {
@@ -45,8 +42,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 String strMovieID = extras.getString("movieID");
                 //The key argument here must match that used in the other activity
                 Toast.makeText(getApplicationContext(),strMovieID,Toast.LENGTH_SHORT).show();
-                 //is this valid id?
-                 Integer movieID=0;
+                //is this valid id?
+                Integer movieID=0;
                 movieID=Integer.parseInt(strMovieID);
                 if(movieID>=1)
                 {
@@ -56,7 +53,10 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                     if (networkInfo != null && networkInfo.isConnected()) {
 
-                        new OpenMovieDetailAsync(context,this).execute(movieID);
+                        //new OpenMovieDetailAsync_OLD(context,this).execute(movieID);
+                        MovieDetails md= new MovieDetails();
+                       md= new MovieDetailAsyncTask().execute(movieID).get();
+                        setcontent(md);
 
                     } else {
                         Log.d(DEBUG_TAG,"No Network Connection");
@@ -73,18 +73,61 @@ public class MovieDetailsActivity extends AppCompatActivity {
         {
             Log.d(DEBUG_TAG,ex.getMessage());
         }
-
     }
 
+
+    private void setcontent(MovieDetails md)
+    {
+        try
+        {
+            //title
+            TextView txtMovieTitle=(TextView)findViewById(R.id.txt_movie_title);
+            txtMovieTitle.setText(md.getMovieTitle());
+            //set toolbar title
+            CollapsingToolbarLayout collapsingToolbarLayout;
+            collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+
+            collapsingToolbarLayout.setTitle(md.getMovieTitle());
+
+           //overview
+            TextView txtMovieOverView=(TextView)findViewById(R.id.txt_movie_overview);
+            txtMovieOverView.setText(md.getOverview());
+            //image
+            ImageView ivPosterImage = (ImageView) findViewById(R.id.titleImg);
+            if(md.getImgURL()!=null && !md.getImgURL().isEmpty())
+            {
+                String imgURL=md.getImgURL();
+
+                Picasso.with(getApplicationContext())
+                        .load(md.getImgURL())
+                        .into(ivPosterImage);
+            }
+            //txt_movie_tagline
+            TextView txtTagline=(TextView)findViewById(R.id.txt_movie_tagline);
+            txtTagline.setText(md.getTagline());
+            //genre
+            TextView  txtGenre=(TextView)findViewById(R.id.txt_movie_genre);
+            String strGenre=md.getMovieGenre();
+            txtGenre.setText(strGenre);
+
+
+        }
+        catch (Exception ex)
+        {
+            Log.d(DEBUG_TAG,ex.getMessage());
+        }
+
+    }
     public void updateMainViewWithResults(ArrayList<MovieDetails> results, MovieDetailsActivity movieDetailsActivity) {
 
         try
         {
+           // ListView listView = (ListView)  movieDetailsActivity.findViewById(R.id.moviedetails_list);
             ListView listView = (ListView)  movieDetailsActivity.findViewById(R.id.moviedetails_list);
             //get context
-            MoviesDetailsArrayAdapter adapter =
-                                    new MoviesDetailsArrayAdapter
-                                            (movieDetailsActivity.getApplicationContext(),results,movieDetailsActivity);
+            MovieDetailsActivity.MoviesDetails2ArrayAdapter adapter =
+                    new MovieDetailsActivity.MoviesDetails2ArrayAdapter
+                            (context,results,movieDetailsActivity);
             listView.setAdapter(adapter);
             if(listView.getParent()!=null)
             {
@@ -101,9 +144,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
     }
 
     //adapter class
-    private class MoviesDetailsArrayAdapter extends ArrayAdapter<MovieDetails> {
-        MovieDetailsActivity  _moviesDetailsActivity;
-        public MoviesDetailsArrayAdapter(Context context, ArrayList<MovieDetails> moviesList, MovieDetailsActivity movieDetailsActivity) {
+    private class MoviesDetails2ArrayAdapter extends ArrayAdapter<MovieDetails> {
+        MovieDetailsActivity _moviesDetailsActivity;
+        public MoviesDetails2ArrayAdapter(Context context, ArrayList<MovieDetails> moviesList, MovieDetailsActivity movieDetailsActivity) {
             super(context,0 , moviesList);
             _moviesDetailsActivity=movieDetailsActivity;
 
@@ -113,7 +156,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             try
             {
-                Typeface   tfMedium = Typeface.createFromAsset(_moviesDetailsActivity.getAssets(),"fonts/Raleway-Medium.ttf");
+                Typeface tfMedium = Typeface.createFromAsset(_moviesDetailsActivity.getAssets(),"fonts/Raleway-Medium.ttf");
                 Typeface   tfLight =Typeface.createFromAsset(_moviesDetailsActivity.getAssets(),"fonts/Raleway-Light.ttf");
                 Log.d(DEBUG_TAG, "...in getView");
                 MovieDetails movie= getItem(position);
@@ -122,7 +165,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
                     LayoutInflater mInflater = (LayoutInflater) _moviesDetailsActivity.getApplicationContext()
                             .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-                    convertView = mInflater.inflate(R.layout.movie_row_details, parent, false);
+                    convertView = mInflater.inflate(R.layout.movie_row_details_old, parent, false);
                 }
                 //Get title textbox and set typeface
                 TextView tvTitle=(TextView)convertView.findViewById(R.id.txt_movie_title);
@@ -133,14 +176,14 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
                 //Set Image
                 ImageView ivPosterImage = (ImageView) convertView.findViewById(R.id.img_Poster);
-                 if(movie.getImgURL()!=null && !movie.getImgURL().isEmpty())
-                 {
-                     String imgURL=movie.getImgURL();
+                if(movie.getImgURL()!=null && !movie.getImgURL().isEmpty())
+                {
+                    String imgURL=movie.getImgURL();
 
-                     Picasso.with(getContext())
-                             .load(movie.getImgURL())
-                             .into(ivPosterImage);
-                 }
+                    Picasso.with(getContext())
+                            .load(movie.getImgURL())
+                            .into(ivPosterImage);
+                }
 
                 //set title,genre
                 tvTitle.setText(movie.getMovieTitle());
