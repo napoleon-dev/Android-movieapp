@@ -56,6 +56,10 @@ public class MyUtilClass {
 
         return url;
     }
-
+    public static String getMovieDetailsURL(String  strMovieID)
+    {
+        String strUrl="https://api.themoviedb.org/3/movie/"+strMovieID;
+        return  strUrl;
+    }
 
 }

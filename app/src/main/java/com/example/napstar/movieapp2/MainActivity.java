@@ -3,6 +3,7 @@ package com.example.napstar.movieapp2;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 
@@ -50,26 +52,48 @@ public class MainActivity extends AppCompatActivity {
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-        //init Progress
-         ProgressDialog loading= new ProgressDialog(this);
-        loading.setCancelable(false);
-        loading.setMessage("Fetching Data ..Please Wait");
-        loading.show();
+
+
+
         moviesList= new ArrayList<MovieModel>();
         context=getApplicationContext();
         // Check if the NetworkConnection is active and connected.
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected()) {
+        try
+        {
+            ConnectivityManager connMgr = (ConnectivityManager)
+                    getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+            if (networkInfo != null && networkInfo.isConnected()) {
 
-            new OpenMovieModelAsync(context,this).execute();
-            loading.dismiss();
+                new OpenMovieModelAsync(context,this).execute();
 
-        } else {
-            Log.d(DEBUG_TAG,"No Network Connection");
+
+            } else {
+                Log.d(DEBUG_TAG,"No Network Connection");
+
+            }
+        }
+        catch(Exception ex)
+        {
 
         }
+
+        //set on click listener
+        ListView lv= (ListView)findViewById(R.id.movies_list);;
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position,long id)
+            {
+
+                // selected item
+                TextView tvID=(TextView) view.findViewById(R.id.movie_ID);
+                String selectedMovieID = (tvID).getText().toString();
+                Intent intent = new Intent(context, MovieDetails_2.class);
+
+                intent.putExtra("movieID", selectedMovieID);
+                startActivity(intent);
+            }
+        });
     }
 
     /**
