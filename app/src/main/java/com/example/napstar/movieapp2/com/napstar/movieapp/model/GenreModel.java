@@ -1,6 +1,9 @@
-package com.example.napstar.movieapp2;
+package com.example.napstar.movieapp2.com.napstar.movieapp.model;
 
 import android.util.Log;
+
+import com.example.napstar.movieapp2.com.napstar.movieapp.utils.HTTPConnectionObj;
+import com.example.napstar.movieapp2.com.napstar.movieapp.utils.MyUtilClass;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -91,7 +94,7 @@ public class GenreModel {
         try
         {
             InputStream inputStream = null;
-            inputStream=HTTPConnectionObj.connectHTTP(MyUtilClass.getGenreURL());
+            inputStream= HTTPConnectionObj.connectHTTP(MyUtilClass.getGenreURL());
             return parseGenreResults(MyUtilClass.stringify(inputStream));
         }
         finally

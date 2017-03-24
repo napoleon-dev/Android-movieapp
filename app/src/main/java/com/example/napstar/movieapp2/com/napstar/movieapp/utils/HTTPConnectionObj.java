@@ -1,4 +1,4 @@
-package com.example.napstar.movieapp2;
+package com.example.napstar.movieapp2.com.napstar.movieapp.utils;
 
 import android.util.Log;
 

@@ -18,6 +18,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.napstar.movieapp2.com.napstar.movieapp.com.napstar.movieapp.async.MovieDetailAsyncTask;
+import com.example.napstar.movieapp2.com.napstar.movieapp.model.MovieDetails;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
@@ -76,38 +78,39 @@ public class MovieDetailsActivity extends AppCompatActivity {
     }
 
 
-    private void setcontent(MovieDetails md)
+    private void setcontent(MovieDetails movieDetails)
     {
         try
         {
             //title
             TextView txtMovieTitle=(TextView)findViewById(R.id.txt_movie_title);
-            txtMovieTitle.setText(md.getMovieTitle());
+            txtMovieTitle.setText(movieDetails.getMovieTitle());
             //set toolbar title
             CollapsingToolbarLayout collapsingToolbarLayout;
             collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
 
-            collapsingToolbarLayout.setTitle(md.getMovieTitle());
+            collapsingToolbarLayout.setTitle(movieDetails.getMovieTitle());
 
            //overview
             TextView txtMovieOverView=(TextView)findViewById(R.id.txt_movie_overview);
-            txtMovieOverView.setText(md.getOverview());
+            txtMovieOverView.setText(movieDetails.getOverview());
             //image
             ImageView ivPosterImage = (ImageView) findViewById(R.id.titleImg);
-            if(md.getImgURL()!=null && !md.getImgURL().isEmpty())
+            if(movieDetails.getImgURL()!=null && !movieDetails.getImgURL().isEmpty())
             {
-                String imgURL=md.getImgURL();
+                String imgURL=movieDetails.getImgURL();
 
                 Picasso.with(getApplicationContext())
-                        .load(md.getImgURL())
-                        .into(ivPosterImage);
+                        .load(movieDetails.getImgURL())
+                         .into(ivPosterImage)
+                        ;
             }
             //txt_movie_tagline
             TextView txtTagline=(TextView)findViewById(R.id.txt_movie_tagline);
-            txtTagline.setText(md.getTagline());
+            txtTagline.setText(movieDetails.getTagline());
             //genre
             TextView  txtGenre=(TextView)findViewById(R.id.txt_movie_genre);
-            String strGenre=md.getMovieGenre();
+            String strGenre=movieDetails.getMovieGenre();
             txtGenre.setText(strGenre);
 
 

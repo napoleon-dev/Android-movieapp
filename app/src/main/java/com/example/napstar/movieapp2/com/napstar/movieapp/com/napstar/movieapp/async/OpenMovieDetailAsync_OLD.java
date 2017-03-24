@@ -1,8 +1,12 @@
-package com.example.napstar.movieapp2;
+package com.example.napstar.movieapp2.com.napstar.movieapp.com.napstar.movieapp.async;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.example.napstar.movieapp2.MovieDetailsActivity;
+import com.example.napstar.movieapp2.MovieDetailsActivity_OLD;
+import com.example.napstar.movieapp2.com.napstar.movieapp.model.MovieDetails;
 
 import java.util.ArrayList;
 

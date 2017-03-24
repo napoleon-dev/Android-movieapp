@@ -1,6 +1,8 @@
-package com.example.napstar.movieapp2;
+package com.example.napstar.movieapp2.com.napstar.movieapp.com.napstar.movieapp.async;
 
 import android.os.AsyncTask;
+
+import com.example.napstar.movieapp2.com.napstar.movieapp.model.MovieDetails;
 
 /**
  * Created by Napstar on 3/17/2017.

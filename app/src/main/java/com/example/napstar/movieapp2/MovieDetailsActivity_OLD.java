@@ -17,6 +17,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.napstar.movieapp2.com.napstar.movieapp.com.napstar.movieapp.async.OpenMovieDetailAsync_OLD;
+import com.example.napstar.movieapp2.com.napstar.movieapp.model.MovieDetails;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;

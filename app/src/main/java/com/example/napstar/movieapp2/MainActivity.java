@@ -1,22 +1,33 @@
 package com.example.napstar.movieapp2;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
+
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+
+import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import com.example.napstar.movieapp2.com.napstar.movieapp.com.napstar.movieapp.async.MoviesAsyncTask;
+import com.example.napstar.movieapp2.com.napstar.movieapp.com.napstar.movieapp.async.TestMovieAsync;
+import com.example.napstar.movieapp2.com.napstar.movieapp.model.MovieModel;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
@@ -25,12 +36,15 @@ import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity   implements SwipeRefreshLayout.OnRefreshListener {
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -40,10 +54,18 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<MovieModel> moviesList;
     Context context;
     private Typeface tfMedium,tfLight;
- //   private final String API_KEY = "a347ef1926ae724eb261182a8de57b59";
-    private static final String DEBUG_TAG = "MovieApp2";
-    private static final String strURL="https://api.themoviedb.org/3/movie/now_playing";
-   ;
+
+    private static final String DEBUG_TAG = "MainActivity";
+
+    private ProgressDialog loading = null;
+    private SwipeRefreshLayout swipeContainer = null;
+    MoviesArrayAdapter adapter =null;
+    // variable to toggle city values on refresh
+   // boolean refreshToggle = true;
+    Handler handler=null;
+    ListView listViewMovies=null;
+
+    boolean refreshToggle = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,48 +73,128 @@ public class MainActivity extends AppCompatActivity {
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-
-
+            listViewMovies=(ListView)findViewById(R.id.movies_list);
+            boolean refrshToggle=true;
 
         moviesList= new ArrayList<MovieModel>();
         context=getApplicationContext();
+        this.setFinishOnTouchOutside(true);
         // Check if the NetworkConnection is active and connected.
         try
         {
+            swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipe);
+            // Setup refresh listener which triggers new data loading
+
+            swipeContainer.setSize(SwipeRefreshLayout.LARGE);
+            swipeContainer.setProgressViewOffset(false, 0,400);
+            // Configure the refreshing colors
+            swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+                    android.R.color.background_dark,
+                    android.R.color.holo_orange_light,
+                    android.R.color.holo_red_light);
+
+
             ConnectivityManager connMgr = (ConnectivityManager)
                     getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-            if (networkInfo != null && networkInfo.isConnected()) {
+            boolean isConnected = networkInfo != null &&
+                    networkInfo.isConnectedOrConnecting();
+            if (isConnected) {
 
-                new OpenMovieModelAsync(context,this).execute();
+          //  new MoviesAsyncTask(context,MainActivity.this).execute();
+                moviesList= new TestMovieAsync().execute().get();
+                ListView listView = (ListView)  findViewById(R.id.movies_list);
+                Log.d("DEBUG_TAG", moviesList.toString());
+                // Add results to listView.
+                Context ctx=getContext();
+                  adapter = new MoviesArrayAdapter (getContext(), moviesList,MainActivity.this);
+                listView.setAdapter(adapter);
+
+
 
 
             } else {
+
+                AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+                builder1.setMessage("Cannot connect to Internet");
+                builder1.setCancelable(true);
+
+                builder1.setPositiveButton(
+                        "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alert11 = builder1.create();
+                alert11.show();
+
                 Log.d(DEBUG_TAG,"No Network Connection");
 
             }
+
+
+            //set on click listener
+
+            listViewMovies.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position,long id)
+                {
+
+                    // selected item
+                    TextView tvID=(TextView) view.findViewById(R.id.movie_ID);
+                    String selectedMovieID = (tvID).getText().toString();
+                    Intent intent = new Intent(context, MovieDetailsActivity.class);
+
+                    intent.putExtra("movieID", selectedMovieID);
+                    startActivity(intent);
+                }
+            });
+
+            swipeContainer.setOnRefreshListener(this);
+
+            /**
+             * Showing Swipe Refresh animation on activity create
+             * As animation won't start on onCreate, post runnable is used
+             */
+            handler = new Handler() {
+                public void handleMessage(android.os.Message msg) {
+
+                 swipeContainer.setRefreshing(true);
+                    listViewMovies.setAdapter(adapter);
+
+                    swipeContainer.postDelayed(new Runnable() {
+
+                        @Override
+                        public void run() {
+
+                            testSwipe();
+                            /*Toast.makeText(getApplicationContext(),
+                                    "city list refreshed", Toast.LENGTH_SHORT).show();*/
+                           swipeContainer.setRefreshing(false);
+                        }
+                    }, 500);
+                }
+
+                ;
+            };
+
         }
         catch(Exception ex)
         {
-
+            Log.d(DEBUG_TAG,ex.getMessage());
         }
 
-        //set on click listener
-        ListView lv= (ListView)findViewById(R.id.movies_list);;
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position,long id)
-            {
 
-                // selected item
-                TextView tvID=(TextView) view.findViewById(R.id.movie_ID);
-                String selectedMovieID = (tvID).getText().toString();
-                Intent intent = new Intent(context, MovieDetailsActivity.class);
+    }
 
-                intent.putExtra("movieID", selectedMovieID);
-                startActivity(intent);
-            }
-        });
+    private void testSwipe() {
+
+       // adapter.notifyDataSetChanged();
+        Toast.makeText(getApplicationContext(),
+                "list refreshed", Toast.LENGTH_SHORT).show();
+        Log.d("DEBUG_TAG", "Swipe refresh called");
+
     }
 
     /**
@@ -127,16 +229,20 @@ public class MainActivity extends AppCompatActivity {
     public  void updateMainViewWithResults(ArrayList<MovieModel> result,MainActivity mainActivity) {
         try
         {
-            //update  main activity here
-          //  ListView listView = (ListView)findViewById(R.id.movies_list);
-            //TextView textView = (TextView) ((Activity) context).findViewById(R.id.textView1);
 
+            if(moviesList==null)
+            {
+                moviesList= new ArrayList<MovieModel>();
+            }
+            moviesList=result;
+         //  swipeContainer.setRefreshing(false);
+            //update  main activity here
             ListView listView = (ListView)  mainActivity.findViewById(R.id.movies_list);
-            Log.d("upd8MainViewWithResults", result.toString());
+            Log.d("DEBUG_TAG", moviesList.toString());
             // Add results to listView.
             Context ctx=mainActivity.getContext();
             MoviesArrayAdapter adapter =
-                    new MoviesArrayAdapter (mainActivity.getContext(), result,mainActivity);
+                    new MoviesArrayAdapter (mainActivity.getContext(), moviesList,mainActivity);
             listView.setAdapter(adapter);
             if(listView.getParent()!=null)
             {
@@ -161,9 +267,42 @@ public class MainActivity extends AppCompatActivity {
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
     }
-//inner class
 
- private class MoviesArrayAdapter extends ArrayAdapter<MovieModel>{
+    @Override
+    public void onRefresh() {
+
+        swipeContainer.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+              //  swipeContainer.setRefreshing(true);
+                testSwipe();
+                handler.sendEmptyMessage(0);
+            }
+        }, 1000);
+
+    }
+
+
+
+
+
+   /* @Override
+    public void onRefresh() {
+        swipeContainer.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                swipeContainer.setRefreshing(true);
+                new MoviesAsyncTask(context, MainActivity.this).execute();
+                handler.sendEmptyMessage(0);
+            }
+        }, 1000);
+
+    }*/
+
+    //inner class
+    private class MoviesArrayAdapter extends ArrayAdapter<MovieModel>{
         MainActivity _mainActivity;
         public MoviesArrayAdapter(Context context, ArrayList<MovieModel> moviesList,MainActivity mainActivity) {
             super(context,0 , moviesList);
@@ -171,6 +310,7 @@ public class MainActivity extends AppCompatActivity {
             tfMedium =Typeface.createFromAsset(_mainActivity.getAssets(),"fonts/Raleway-Medium.ttf");
             tfLight =Typeface.createFromAsset(_mainActivity.getAssets(),"fonts/Raleway-Light.ttf");
         }
+
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -186,6 +326,7 @@ public class MainActivity extends AppCompatActivity {
                                                                     .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
                     convertView = mInflater.inflate(R.layout.movie_row_item, parent, false);
                 }
+
                 //set title
                 TextView tvTitle=(TextView)convertView.findViewById(R.id.movie_title);
                 tvTitle.setTypeface(tfMedium);

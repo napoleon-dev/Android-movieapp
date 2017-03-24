@@ -1,9 +1,8 @@
-package com.example.napstar.movieapp2;
+package com.example.napstar.movieapp2.com.napstar.movieapp.model;
 
-import android.content.Context;
-import android.graphics.Typeface;
 import android.util.Log;
-import android.widget.ArrayAdapter;
+
+import com.example.napstar.movieapp2.com.napstar.movieapp.utils.MyUtilClass;
 
 import org.json.JSONArray;
 import org.json.JSONException;

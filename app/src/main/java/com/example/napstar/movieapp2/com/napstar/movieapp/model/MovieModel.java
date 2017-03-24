@@ -1,6 +1,8 @@
-package com.example.napstar.movieapp2;
+package com.example.napstar.movieapp2.com.napstar.movieapp.model;
 
 import android.util.Log;
+
+import com.example.napstar.movieapp2.com.napstar.movieapp.utils.MyUtilClass;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,7 +14,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.collections4.collection.*;
 
 /**
  * Created by Napstar on 3/6/2017.
